@@ -109,15 +109,18 @@ public class DefaultPublisher extends Thread implements EventPublisher {
                 waitTimes--;
             }
 
+            int batchSize = Math.max(2, queueMaxSize / 100);
+            List<Event> events = new ArrayList<>(batchSize);
+            int maxElements = batchSize - 1;
             while (!shutdown) {
                 final Event event = queue.take();
-                List<Event> events = new ArrayList<>(queue.size());
-                queue.drainTo(events);
                 events.add(event);
+                queue.drainTo(events, maxElements);
                 for (int i = 0, size = events.size(); !shutdown && i < size; i++) {
                     receiveEvent(events.get(i));
                     UPDATER.compareAndSet(this, lastEventSequence, Math.max(lastEventSequence, event.sequence()));
                 }
+                events.clear();
             }
         } catch (Throwable ex) {
             if (!shutdown) {
