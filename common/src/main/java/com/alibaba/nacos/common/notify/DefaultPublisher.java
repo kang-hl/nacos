@@ -109,7 +109,7 @@ public class DefaultPublisher extends Thread implements EventPublisher {
                 waitTimes--;
             }
 
-            int batchSize = Math.max(2, queueMaxSize / 100);
+            int batchSize = Math.max(10, queueMaxSize / 100);
             List<Event> events = new ArrayList<>(batchSize);
             int maxElements = batchSize - 1;
             while (!shutdown) {
